@@ -47,6 +47,12 @@ class BurgerBuilder extends Component {
     }
 
     render(){
+        const disableInfo ={
+            ...this.state.ingredients
+        }
+        for (let key in disableInfo){
+            disableInfo[key] = disableInfo[key] <=0 
+        }
         return (
             <Auxi>
                 <div>
@@ -56,6 +62,8 @@ class BurgerBuilder extends Component {
                     <BuildControls 
                         addNewIngedient={this.addIngredient}
                         removeIngredient={this.removeIngredient}
+                        disabled={disableInfo}
+                        price={this.state.totalePrice}
                     />
                 </div>
 
