@@ -2,6 +2,8 @@ import React , {Component} from 'react' ;
 import Auxi from '../../HOC/Auxi';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
+import Modal from "../../components/UI/Modal/Modal";
+import  OrderSummury from "../../components/Burger/OrderSummury/OrderSummury";
 
 const INGREDIENTS_PRICE ={
     salad : 0.6,
@@ -17,7 +19,20 @@ class BurgerBuilder extends Component {
             meat:0,
             cheese:0
         },
-        totalePrice : 4
+        totalePrice : 4,
+        purchasable : false,
+        purchasing : false
+    }
+    updatePurchaseState =(ingredients) => {
+        const sum = Object.keys(ingredients).map(key => {
+            return ingredients[key]
+        }).reduce((sum,el)=>{
+            return sum+el
+        },0);
+        this.setState({
+            purchasable: sum > 0 
+        })
+        
     }
     addIngredient = (type) => {
         const updatedIngrendients = {
@@ -29,6 +44,7 @@ class BurgerBuilder extends Component {
             ingredients: updatedIngrendients,
             totalePrice:newPrice
         })
+        this.updatePurchaseState(updatedIngrendients)
     }
     removeIngredient = (type) => {
         const updatedIngrendients = {
@@ -37,13 +53,16 @@ class BurgerBuilder extends Component {
         if(this.state.ingredients[type] > 0 ){
             updatedIngrendients[type] = this.state.ingredients[type] -1 ;
             let newPrice = this.state.totalePrice - INGREDIENTS_PRICE[type] ;
-        this.setState({
-            ingredients: updatedIngrendients,
-            totalePrice:newPrice
-        })
+            this.setState({
+                ingredients: updatedIngrendients,
+                totalePrice:newPrice
+            })
+            this.updatePurchaseState(updatedIngrendients)
         }
         else return;
-        
+    }
+    purchaseHandler = () => {
+        this.setState({purchasing: true})
     }
 
     render(){
@@ -55,18 +74,18 @@ class BurgerBuilder extends Component {
         }
         return (
             <Auxi>
-                <div>
-                    <Burger ingredients={this.state.ingredients}/>
-                </div>
-                <div>
-                    <BuildControls 
-                        addNewIngedient={this.addIngredient}
-                        removeIngredient={this.removeIngredient}
-                        disabled={disableInfo}
-                        price={this.state.totalePrice}
-                    />
-                </div>
-
+                <Modal show={this.state.purchasing} >
+                    <OrderSummury ingredients={this.state.ingredients}  />
+                </Modal>
+                <Burger ingredients={this.state.ingredients}/>
+                <BuildControls 
+                    addNewIngedient={this.addIngredient}
+                    removeIngredient={this.removeIngredient}
+                    disabled={disableInfo}
+                    price={this.state.totalePrice}
+                    purchasable={this.state.purchasable}
+                    purchaseHandler={this.purchaseHandler}
+                />
             </Auxi>
         )
     }
